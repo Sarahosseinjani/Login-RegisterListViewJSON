@@ -16,15 +16,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+//comment are using sqlite database and then you neeed DatabaseHelper class , now we use room database
 public class MainActivity extends AppCompatActivity {
 
     private TextView tvRegister;
     private EditText etLoginGmail,etLoginPassword;
     private Button loginButton;
 
-    private SQLiteDatabase db;
-    private SQLiteOpenHelper openHelper;
+   // private SQLiteDatabase db;
+   // private SQLiteOpenHelper openHelper;
     private Cursor cursor;
 
 
@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        openHelper = new DatabaseHelper(this);
-        db = openHelper.getReadableDatabase();
+       // openHelper = new DatabaseHelper(this);
+        // db = openHelper.getReadableDatabase();
         tvRegister = findViewById(R.id.tvRegister);
         etLoginGmail = findViewById(R.id.etLogGmail);
         etLoginPassword = findViewById(R.id.etLoginPassword);
@@ -51,25 +51,62 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Enter your Email and Password to login", Toast.LENGTH_SHORT).show();
                 } else {
                     //check if this account exists
-                    cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME + " WHERE " + DatabaseHelper.COL_2 + "=? AND " + DatabaseHelper.COL_3 + "=?", new String[]{email, password});
-                    if (cursor != null) {
-                        if (cursor.getCount() > 0) {
+//                    cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME + " WHERE " + DatabaseHelper.COL_2 + "=? AND " + DatabaseHelper.COL_3 + "=?", new String[]{email, password});
+//                    if (cursor != null) {
+//                        if (cursor.getCount() > 0) {
+//                            //check internet connection
+//                            // get from https://www.tutlane.com/tutorial/android/android-internet-connection-status-with-examples#:~:text=In%20android%2C%20we%20can%20determine,connection%20is%20available%20or%20not.
+//                            ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+//                            NetworkInfo nInfo = cm.getActiveNetworkInfo();
+//                            boolean connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected();
+//                            if(connected) {
+//                                startActivity(new Intent(MainActivity.this, ListActivity.class));
+//                                Toast.makeText(getApplicationContext(), "Login sucess", Toast.LENGTH_SHORT).show();
+//                            }else{
+//                                Toast.makeText(getApplicationContext(), "No Internet Connection" , Toast.LENGTH_SHORT).show();
+//                            }
+//
+//                        } else {
+//                            Toast.makeText(getApplicationContext(), "Login error", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+
+                    //*******************************************************
+
+                    //Perform Query
+                    UserDatabase userDatabase = UserDatabase.getUserDatabase(getApplicationContext());
+                    UserDao userDao = userDatabase.userDao();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            UserEntity userEntity = userDao.login(email, password);
+                            if(userEntity == null){
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "Login error", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }else{
                             //check internet connection
                             // get from https://www.tutlane.com/tutorial/android/android-internet-connection-status-with-examples#:~:text=In%20android%2C%20we%20can%20determine,connection%20is%20available%20or%20not.
                             ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
                             NetworkInfo nInfo = cm.getActiveNetworkInfo();
                             boolean connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected();
-                            if(connected) {
-                                startActivity(new Intent(MainActivity.this, ListActivity.class));
-                                Toast.makeText(getApplicationContext(), "Login sucess", Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(getApplicationContext(), "No Internet Connection" , Toast.LENGTH_SHORT).show();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(connected) {
+                                        startActivity(new Intent(MainActivity.this, ListActivity.class));
+                                        Toast.makeText(getApplicationContext(), "Login sucess", Toast.LENGTH_SHORT).show();
+                                    }else{
+                                        Toast.makeText(getApplicationContext(), "No Internet Connection" , Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                             }
-
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Login error", Toast.LENGTH_SHORT).show();
                         }
-                    }
+                    }).start();
                 }
             }
         });
