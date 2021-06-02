@@ -59,7 +59,7 @@ public class ListAdapter extends BaseAdapter {
 
             holder.iv = (ImageView) convertView.findViewById(R.id.iv);
             holder.tvname = (TextView) convertView.findViewById(R.id.name);
-            holder.tvcountry = (TextView) convertView.findViewById(R.id.email);
+            holder.tvemail = (TextView) convertView.findViewById(R.id.email);
 
 
             convertView.setTag(holder);
@@ -71,7 +71,7 @@ public class ListAdapter extends BaseAdapter {
         //load the image from URL using Picasso.
         Picasso.get().load(dataModelArrayList.get(position).getImgURL()).into(holder.iv);
         holder.tvname.setText("Name: "+dataModelArrayList.get(position).getName());
-        holder.tvcountry.setText("Email: "+dataModelArrayList.get(position).getEmail());
+        holder.tvemail.setText("Email: "+dataModelArrayList.get(position).getEmail());
 
 
         return convertView;
@@ -79,7 +79,7 @@ public class ListAdapter extends BaseAdapter {
 
     private class ViewHolder {
 
-        protected TextView tvname, tvcountry, tvcity;
+        protected TextView tvname, tvemail;
         protected ImageView iv;
     }
 
